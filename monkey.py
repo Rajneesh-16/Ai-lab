@@ -1,40 +1,40 @@
 from collections import deque
 
-# State = (monkey_pos, box_pos, banana_pos, has_banana)
-start = ('door', 'floor', 'middle', False)
-goal = lambda s: s[3] is True
-
-actions = [
-    lambda s: ('middle', s[1], s[2], s[3]) if s[0] != 'middle' else None,          # move
-    lambda s: ('middle', 'middle', s[2], s[3]) if s[0] == s[1] else None,          # push box
-    lambda s: ('middle', 'middle', 'middle', s[3]) if s[1] == 'middle' else None, # climb
-    lambda s: ('middle', 'middle', 'middle', True) if s[0]==s[1]==s[2] else None  # grab
-]
+start = ('door','window','middle',False)
+pos = ['door','window','middle']
 
 def bfs():
-    q = deque([(start, [])])
-    visited = {start}
+    q = deque([start])
+    vis = set()
     step = 1
 
     while q:
-        state, path = q.popleft()
-        print(f"Step {step}: {state}")
+        s = q.popleft()
+        if s in vis: 
+            continue
+
+        vis.add(s)
+        print(f"Step {step}: {s}")
         step += 1
 
-        if goal(state):
-            print("\n Banana obtained!")
-            for p in path:
-                print(p)
-            print("Final State:", state)
+        m,b,ba,has = s
+        if has:
+            print("\nBanana obtained!")
             return
 
-        for a in actions:
-            ns = a(state)
-            if ns and ns not in visited:
-                visited.add(ns)
-                q.append((ns, path + [ns]))
+        # move
+        for p in pos:
+            if p != m:
+                q.append((p,b,ba,has))
+
+        # push
+        if m == b:
+            for p in pos:
+                if p != b:
+                    q.append((p,p,ba,has))
+
+        # grab
+        if m == b == ba:
+            q.append((m,b,ba,True))
 
 bfs()
-
-'''Step 1: ('door', 'floor', 'middle', False)
-Step 2: ('middle', 'floor', 'middle', False)'''
