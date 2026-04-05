@@ -1,44 +1,50 @@
 from collections import deque
 
-def water_jug():
-    visited = set()
-    queue = deque([((0, 0), [])])
+def solve_water_jug(jug1_cap, jug2_cap, target):
+    # Queue stores (amt_in_jug1, amt_in_jug2, path_taken)
+    queue = deque([(0, 0, [])])
+    visited = set([(0, 0)])
 
     while queue:
-        (a, b), path = queue.popleft()
+        j1, j2, path = queue.popleft()
 
-        if (a, b) in visited:
-            continue
+        # Check if we reached the target in either jug
+        if j1 == target or j2 == target:
+            return path + [(j1, j2)]
 
-        visited.add((a, b))
-        path = path + [(a, b)]
-
-        if a == 2:
-            return path
-
+        # Define all possible moves
         moves = [
-            (4, b),                         # Fill jug A
-            (a, 3),                         # Fill jug B
-            (0, b),                         # Empty jug A
-            (a, 0),                         # Empty jug B
-            (a - min(a, 3 - b), b + min(a, 3 - b)),  # Pour A -> B
-            (a + min(b, 4 - a), b - min(b, 4 - a))   # Pour B -> A
+            (jug1_cap, j2),        # Fill Jug 1
+            (j1, jug2_cap),        # Fill Jug 2
+            (0, j2),               # Empty Jug 1
+            (j1, 0),               # Empty Jug 2
+            # Pour Jug 1 -> Jug 2
+            (j1 - min(j1, jug2_cap - j2), j2 + min(j1, jug2_cap - j2)),
+            # Pour Jug 2 -> Jug 1
+            (j1 + min(j2, jug1_cap - j1), j2 - min(j2, jug1_cap - j1))
         ]
 
         for move in moves:
             if move not in visited:
-                queue.append((move, path))
+                visited.add(move)
+                queue.append((move[0], move[1], path + [(j1, j2)]))
 
+    return None
 
-solution = water_jug()
+# Parameters: Jug 1 Capacity, Jug 2 Capacity, Target
+jug1, jug2, goal = 4, 3, 2
+solution = solve_water_jug(jug1, jug2, goal)
 
-for step in solution:
-    print(step)
+if solution:
+    print(f"Steps to get {goal} gallons:")
+    for step in solution:
+        print(step)
+else:
+    print("No solution possible.")
 
-'''(0, 0)
-(4, 0)
-(1, 3)
-(1, 0)
-(0, 1)
-(4, 1)
-(2, 3)'''
+    '''Steps to get 2 gallons:
+(0, 0)
+(0, 3)
+(3, 0)
+(3, 3)
+(4, 2)'''
